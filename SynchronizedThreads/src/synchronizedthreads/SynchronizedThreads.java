@@ -10,6 +10,7 @@ class Q {
             try {
                 wait();
             } catch (Exception e) {
+                System.out.println("Exception in put");
             }
         }
         this.n = n;
@@ -23,6 +24,7 @@ class Q {
             try {
                 wait();
             } catch (Exception e) {
+                System.out.println("Exception in get");
             }
         }
         System.out.println("Got: " + n);
