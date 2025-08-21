@@ -1,76 +1,72 @@
 package synchronizedthreads;
 
-// Shared resource
 class Q {
-    int n;
-    boolean valueSet = false;
 
-    synchronized int get() {
-        while (!valueSet) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                System.out.println("Interrupted in get");
-            }
-        }
-        System.out.println("Got: " + n);
-        valueSet = false;
-        notify();
-        return n;
-    }
+    int n;
+    boolean ready = false;
 
     synchronized void put(int n) {
-        while (valueSet) {
+        while (ready) {   // wait if data not yet consumed
             try {
                 wait();
-            } catch (InterruptedException e) {
-                System.out.println("Interrupted in put");
+            } catch (Exception e) {
             }
         }
         this.n = n;
         System.out.println("Put: " + n);
-        valueSet = true;
+        ready = true;
+        notify();
+    }
+
+    synchronized void get() {
+        while (!ready) {  // wait if no data yet
+            try {
+                wait();
+            } catch (Exception e) {
+            }
+        }
+        System.out.println("Got: " + n);
+        ready = false;
         notify();
     }
 }
 
-// Producer Thread
-class Producer implements Runnable {
+class Producer extends Thread {
+
     Q q;
 
     Producer(Q q) {
         this.q = q;
-        new Thread(this, "Producer").start();
+        start();
     }
 
     public void run() {
-        for (int i = 0; i <= 5; i++) {
+        for (int i = 1; i <= 5; i++) {
             q.put(i);
         }
     }
 }
 
-// Consumer Thread
-class Consumer implements Runnable {
+class Consumer extends Thread {
+
     Q q;
 
     Consumer(Q q) {
         this.q = q;
-        new Thread(this, "Consumer").start();
+        start();
     }
 
     public void run() {
-        for (int i = 0; i <= 5; i++) {
+        for (int i = 1; i <= 5; i++) {
             q.get();
         }
     }
 }
 
-// Main class
 public class SynchronizedThreads {
+
     public static void main(String[] args) {
         Q q = new Q();
-        System.out.println("Press Ctrl+C to stop...");
         new Producer(q);
         new Consumer(q);
     }
